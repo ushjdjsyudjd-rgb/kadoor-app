@@ -1,6 +1,28 @@
-// در فایل lib/main.dart
-theme: ThemeData(
-  primarySwatch: Colors.red, // تغییر به قرمز
-  primaryColor: Color(0xFFC62828), // قرمز کادور
-  scaffoldBackgroundColor: Colors.grey[100], // پس‌زمینه روشن مثل سایت
-),
+import 'package:flutter/material.dart';
+import 'screens/home_screen.dart';
+
+void main() {
+  runApp(KadoorApp());
+}
+
+class KadoorApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'کادور پخش شمال',
+      debugShowCheckedModeBanner: false,
+      // تنظیمات تم رنگی بر اساس سایت کادور
+      theme: ThemeData(
+        useMaterial3: false,
+        primarySwatch: Colors.red,
+        primaryColor: const Color(0xFFC62828),
+        scaffoldBackgroundColor: Colors.grey[100],
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFFC62828),
+          elevation: 2,
+        ),
+      ),
+      home: HomeScreen(),
+    );
+  }
+}
