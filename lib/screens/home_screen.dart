@@ -9,88 +9,94 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ApiService apiService = ApiService();
+  String selectedCategory = "همه"; // دسته انتخاب شده
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("کادور پخش شمال", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        backgroundColor: Color(0xFFC62828), // رنگ قرمز برند کادور
+        backgroundColor: Color(0xFFC62828),
         centerTitle: true,
-        actions: [IconButton(icon: Icon(Icons.shopping_cart), onPressed: () {})],
       ),
       body: FutureBuilder<List<Product>>(
         future: apiService.fetchProducts(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator(color: Color(0xFFC62828)));
-          } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text("در حال دریافت لیست محصولات..."));
           }
+          
+          List<Product> allProducts = snapshot.data ?? [];
+          // استخراج لیست دسته‌بندی‌های یکتا از اکسل
+          List<String> categories = ["همه", ...allProducts.map((p) => p.category).toSet().toList()];
+          
+          // فیلتر کردن محصولات بر اساس انتخاب کاربر
+          List<Product> displayedProducts = selectedCategory == "همه" 
+              ? allProducts 
+              : allProducts.where((p) => p.category == selectedCategory).toList();
 
-          return GridView.builder(
-            padding: EdgeInsets.all(10),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.65, // تنظیم برای شبیه شدن به سایت
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
-            itemCount: snapshot.data!.length,
-            itemBuilder: (context, index) {
-              final product = snapshot.data![index];
-              return Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey[300]!),
+          return Column(
+            children: [
+              // منوی افقی دسته‌بندی‌ها
+              Container(
+                height: 50,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: categories.length,
+                  itemBuilder: (context, index) {
+                    bool isSelected = selectedCategory == categories[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
+                      child: ActionChip(
+                        label: Text(categories[index]),
+                        backgroundColor: isSelected ? Color(0xFFC62828) : Colors.white,
+                        labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.black),
+                        onPressed: () {
+                          setState(() { selectedCategory = categories[index]; });
+                        },
+                      ),
+                    );
+                  },
                 ),
-                child: Column(
-                  children: [
-                    // تصویر محصول
-                    Expanded(
-                      flex: 5,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: product.image.isNotEmpty
-                            ? Image.network(product.image, fit: BoxFit.contain)
-                            : Icon(Icons.image, color: Colors.grey),
+              ),
+              // نمایش محصولات (همان کد قبلی با لیست فیلتر شده)
+              Expanded(
+                child: GridView.builder(
+                  padding: EdgeInsets.all(10),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2, childAspectRatio: 0.65, crossAxisSpacing: 10, mainAxisSpacing: 10,
+                  ),
+                  itemCount: displayedProducts.length,
+                  itemBuilder: (context, index) {
+                    final product = displayedProducts[index];
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey[300]!),
                       ),
-                    ),
-                    // نام محصول
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 5),
-                      child: Text(
-                        product.title,
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
+                      child: Column(
+                        children: [
+                          Expanded(child: Image.network(product.image, fit: BoxFit.contain)),
+                          Padding(
+                            padding: EdgeInsets.all(5),
+                            child: Text(product.title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13), textAlign: TextAlign.center),
+                          ),
+                          Text(product.price, style: TextStyle(color: Color(0xFFC62828), fontWeight: FontWeight.bold)),
+                          SizedBox(height: 5),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFC62828)),
+                            onPressed: () {},
+                            child: Text("افزودن", style: TextStyle(color: Colors.white)),
+                          ),
+                          SizedBox(height: 5),
+                        ],
                       ),
-                    ),
-                    Spacer(),
-                    // قیمت محصول (قرمز رنگ مثل سایت)
-                    Text(
-                      product.price,
-                      style: TextStyle(color: Color(0xFFC62828), fontWeight: FontWeight.bold, fontSize: 14),
-                    ),
-                    SizedBox(height: 8),
-                    // دکمه افزودن (شبیه سایت)
-                    Container(
-                      width: double.infinity,
-                      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFFC62828),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                        ),
-                        onPressed: () {},
-                        child: Text("افزودن به سبد", style: TextStyle(fontSize: 12, color: Colors.white)),
-                      ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
-              );
-            },
+              ),
+            ],
           );
         },
       ),
