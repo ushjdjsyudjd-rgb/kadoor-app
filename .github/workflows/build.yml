@@ -6,16 +6,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           
-      - name: Repair Project Structure
-        run: flutter create --platforms android,web . # این دستور فایل‌های مفقود شده را می‌سازد
+      - name: Clean and Reconstruct Project
+        run: |
+          # حذف پوشه‌های قدیمی برای جلوگیری از تداخل نسخه Gradle
+          rm -rf android
+          rm -rf web
+          # ساخت مجدد ساختار استاندارد اندروید و وب با نسخه جدید فلاتر
+          flutter create --platforms android,web .
+          
+      - name: Install dependencies
+        run: flutter pub get
         
-      - run: flutter pub get
-      - run: flutter build apk --release
-      
+      - name: Build Android APK
+        run: flutter build apk --release --no-tree-shake-icons
+        
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
