@@ -15,76 +15,76 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text("کادور پخش شمال", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.green[700],
+        backgroundColor: Color(0xFFC62828), // رنگ قرمز برند کادور
         centerTitle: true,
+        actions: [IconButton(icon: Icon(Icons.shopping_cart), onPressed: () {})],
       ),
       body: FutureBuilder<List<Product>>(
         future: apiService.fetchProducts(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator(color: Colors.green));
-          } else if (snapshot.hasError) {
-            return Center(child: Text("خطا در اتصال به شبکه"));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text("در حال به‌روزرسانی لیست محصولات..."));
+            return Center(child: CircularProgressIndicator(color: Color(0xFFC62828)));
+          } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text("در حال دریافت لیست محصولات..."));
           }
 
           return GridView.builder(
-            padding: EdgeInsets.all(12),
+            padding: EdgeInsets.all(10),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              childAspectRatio: 0.7, // کمی بلندتر برای جایگیری توضیحات
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
+              childAspectRatio: 0.65, // تنظیم برای شبیه شدن به سایت
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
             ),
             itemCount: snapshot.data!.length,
             itemBuilder: (context, index) {
               final product = snapshot.data![index];
-              return Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              return Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey[300]!),
+                ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // بخش تصویر محصول
+                    // تصویر محصول
                     Expanded(
-                      flex: 3,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+                      flex: 5,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
                         child: product.image.isNotEmpty
-                            ? Image.network(product.image, fit: BoxFit.cover, 
-                                errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image, size: 50))
-                            : Container(color: Colors.grey[200], child: Icon(Icons.image, size: 50)),
+                            ? Image.network(product.image, fit: BoxFit.contain)
+                            : Icon(Icons.image, color: Colors.grey),
                       ),
                     ),
-                    // بخش جزئیات محصول
-                    Expanded(
-                      flex: 2,
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Text(
-                              product.title,
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Text(
-                              product.price, // نمایش مستقیم متن قیمت (مثلاً ۲۰۰,۰۰۰ ریال)
-                              style: TextStyle(color: Colors.green[800], fontSize: 13, fontWeight: FontWeight.w600),
-                              textAlign: TextAlign.center,
-                            ),
-                            Text(
-                              product.description,
-                              style: TextStyle(color: Colors.grey[600], fontSize: 11),
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                            ),
-                          ],
+                    // نام محصول
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 5),
+                      child: Text(
+                        product.title,
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                      ),
+                    ),
+                    Spacer(),
+                    // قیمت محصول (قرمز رنگ مثل سایت)
+                    Text(
+                      product.price,
+                      style: TextStyle(color: Color(0xFFC62828), fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                    SizedBox(height: 8),
+                    // دکمه افزودن (شبیه سایت)
+                    Container(
+                      width: double.infinity,
+                      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFFC62828),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                         ),
+                        onPressed: () {},
+                        child: Text("افزودن به سبد", style: TextStyle(fontSize: 12, color: Colors.white)),
                       ),
                     ),
                   ],
