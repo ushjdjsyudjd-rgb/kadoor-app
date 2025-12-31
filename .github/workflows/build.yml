@@ -5,18 +5,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # ارتقا به نسخه ۴
-      
+      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           
+      - name: Repair Project Structure
+        run: flutter create --platforms android,web . # این دستور فایل‌های مفقود شده را می‌سازد
+        
       - run: flutter pub get
-      
-      - run: flutter build apk --split-per-abi
+      - run: flutter build apk --release
       
       - name: Upload APK
-        uses: actions/upload-artifact@v4 # تغییر اصلی اینجاست (v4)
+        uses: actions/upload-artifact@v4
         with:
           name: kadoor-android-app
           path: build/app/outputs/flutter-apk/app-release.apk
