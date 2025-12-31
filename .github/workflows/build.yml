@@ -5,16 +5,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4 # ارتقا به نسخه ۴
+      
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          
       - run: flutter pub get
-      - run: flutter build apk --split-per-abi # ساخت فایل نصب اندروید
-      - run: flutter build web # ساخت نسخه وب برای آیفون
+      
+      - run: flutter build apk --split-per-abi
       
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4 # تغییر اصلی اینجاست (v4)
         with:
           name: kadoor-android-app
           path: build/app/outputs/flutter-apk/app-release.apk
